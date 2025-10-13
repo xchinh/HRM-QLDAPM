@@ -3,8 +3,6 @@
 const express = require("express");
 const router = express.Router();
 
-router.get("/", (req, res) => {
-    res.send("Welcome to the HRM API");
-});
+router.use("/api/v1", require("./access"));
 
 module.exports = router;
