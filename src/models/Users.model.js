@@ -2,6 +2,7 @@
 
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/init.postgres");
+const { ROLE } = require("../enums");
 
 const TABLE_NAME = "User";
 
@@ -27,6 +28,10 @@ const User = sequelize.define(
         password: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        role: {
+            type: DataTypes.ENUM,
+            values: Object.values(ROLE),
         },
     },
     {

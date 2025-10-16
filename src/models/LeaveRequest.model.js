@@ -25,7 +25,7 @@ const LeaveRequest = sequelize.define(
         reason: DataTypes.TEXT,
         status: {
             type: DataTypes.ENUM,
-            values: STATUS_LEAVE,
+            values: Object.values(STATUS_LEAVE),
             default: STATUS_LEAVE.PENDING,
         },
     },

@@ -1,17 +1,20 @@
 "use strict";
 
-const UserRepository = require("../repositories/user.repository");
+const UserRepository = require("../../repositories/user.repository");
 const bcrypt = require("bcrypt");
-const { getDataInfo } = require("../utils");
-const { createPairToken, verifyToken } = require("../auth/authUtils");
+const { getDataInfo } = require("../../utils");
+const { createPairToken, verifyToken } = require("../../auth/authUtils");
 const {
     NotFoundError,
     ConflictError,
     UnauthorizedError,
-} = require("../core/error.response");
+    BadRequestError,
+} = require("../../core/error.response");
+const { ROLE } = require("../../enums");
+const EmployeeRepository = require("../../repositories/employee.repository");
 
 class AccessService {
-    static signup = async ({ username, password }) => {
+    static signup = async ({ username, password, role = ROLE.EMPLOYEE }) => {
         if (!username) {
             throw new NotFoundError("Username is required");
         }
@@ -29,12 +32,13 @@ class AccessService {
         const newUser = await UserRepository.create({
             username,
             password: passwordHash,
+            role,
         });
         if (newUser) {
             return {
-                user: getDataInfo({
+                data: getDataInfo({
                     object: newUser,
-                    field: ["id", "username"],
+                    field: ["id", "username", "role"],
                 }),
             };
         }
@@ -54,12 +58,19 @@ class AccessService {
             throw new NotFoundError("User is not found");
         }
 
-        const validPassword = await bcrypt.compare(
-            password,
-            foundUser.password
-        );
+        const employee = await EmployeeRepository.findOne({
+            attributes: {
+                userId: foundUser.id,
+            },
+        });
 
-        if (!validPassword) {
+        console.log(employee);
+        if (employee && !employee.isActive) {
+            throw new BadRequestError("Account has been disabled");
+        }
+
+        const isMatch = await bcrypt.compare(password, foundUser.password);
+        if (!isMatch) {
             throw new UnauthorizedError("Invalid password");
         }
 
@@ -71,7 +82,7 @@ class AccessService {
         });
 
         return {
-            user: getDataInfo({
+            data: getDataInfo({
                 object: foundUser,
                 field: ["id", "username"],
             }),

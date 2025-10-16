@@ -6,6 +6,9 @@ const express = require("express");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
+const { asyncHandler } = require("./helpers/asyncHandler");
+const { runSeeders } = require("./seeders");
+const models = require("./models");
 const app = express();
 
 // Middleware
@@ -16,7 +19,8 @@ app.use(helmet());
 app.use(compression());
 
 // init db
-require("./db/init.postgres").sync();
+asyncHandler(require("./db/init.postgres").sync());
+// asyncHandler(runSeeders());
 // init routes
 app.use("/", require("./routes"));
 // handle errors

@@ -15,8 +15,19 @@ class UserRepository {
         return User.findByPk(id);
     };
 
-    static create = async ({ username, password }) => {
-        return User.create({ username, password });
+    static create = async ({ username, password, role, options = {} }) => {
+        return User.create({ username, password, role }, options);
+    };
+
+    static findAndUpdate = async ({
+        updateData = {},
+        attributes,
+        transaction = null,
+    }) => {
+        return User.update(updateData, {
+            where: attributes,
+            transaction,
+        });
     };
 }
 

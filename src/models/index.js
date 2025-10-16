@@ -4,7 +4,6 @@ const User = require("./Users.model");
 const Attendance = require("./Attendance.model");
 const Department = require("./Department.model");
 const LeaveRequest = require("./LeaveRequest.model");
-const Position = require("./Position.model");
 const Employee = require("./Employee.model");
 
 User.hasOne(Employee, {
@@ -57,18 +56,6 @@ LeaveRequest.belongsTo(Employee, {
     },
 });
 
-Position.hasMany(Employee, {
-    foreignKey: {
-        name: "position_id",
-    },
-});
-
-Employee.belongsTo(Position, {
-    foreignKey: {
-        name: "position_id",
-    },
-});
-
 Department.hasMany(Employee, {
     foreignKey: {
         name: "department_id",
@@ -80,3 +67,11 @@ Employee.belongsTo(Department, {
         name: "department_id",
     },
 });
+
+module.exports = {
+    User,
+    Attendance,
+    Department,
+    LeaveRequest,
+    Employee,
+};

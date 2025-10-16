@@ -12,4 +12,10 @@ module.exports = {
         LEAVE: "006",
         LATE: "007",
     },
+    ROLE: {
+        ADMIN: "0001",
+        MANAGER: "0002",
+        HR: "0003",
+        EMPLOYEE: "0004",
+    },
 };

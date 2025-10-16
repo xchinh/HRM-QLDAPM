@@ -15,7 +15,7 @@ const employee = sequelize.define(
         },
         fullName: DataTypes.STRING,
         birthday: DataTypes.DATE,
-        gender: DataTypes.ENUM("Male", "Female"),
+        gender: { type: DataTypes.ENUM("Male", "Female") },
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -27,6 +27,14 @@ const employee = sequelize.define(
         address: DataTypes.TEXT,
         hired_at: {
             type: DataTypes.DATE,
+            allowNull: false,
+        },
+        position_name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        base_salary: {
+            type: DataTypes.DECIMAL(15, 2),
             allowNull: false,
         },
         isActive: DataTypes.BOOLEAN,

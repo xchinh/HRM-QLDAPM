@@ -1,7 +1,7 @@
 "use strict";
 
 const { CREATED, OK } = require("../core/success.response");
-const AccessService = require("../services/access.service");
+const AccessService = require("../services/access/access.service");
 
 class AccessController {
     static signup = async (req, res, next) => {

@@ -22,7 +22,7 @@ const attendance = sequelize.define(
         check_out: DataTypes.TIME,
         status: {
             type: DataTypes.ENUM,
-            values: STATUS_ATTENDANCE,
+            values: Object.values(STATUS_ATTENDANCE),
         },
     },
     {
