@@ -1,6 +1,6 @@
 "use strict";
 
-const department = require("../models/Department.model");
+const Department = require("../models/Department.model");
 
 const departments = [
     {
@@ -32,9 +32,11 @@ const departments = [
 
 const seedDepartments = async () => {
     try {
-        await department.bulkCreate(departments, {
-            force: true,
+        await Department.destroy({
+            truncate: { cascade: true },
+            restartIdentity: true,
         });
+        await Department.bulkCreate(departments);
         console.log("Departments seeded successfully");
     } catch (error) {
         console.error("Error seeding departments:", error);

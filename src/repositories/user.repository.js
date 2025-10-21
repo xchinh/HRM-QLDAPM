@@ -1,6 +1,7 @@
 "use strict";
 
-const User = require("../models/users.model");
+const Employee = require("../models/Employee.model");
+const User = require("../models/Users.model");
 
 class UserRepository {
     static findUser = async (username) => {
@@ -12,10 +13,18 @@ class UserRepository {
     };
 
     static findById = async (id) => {
-        return User.findByPk(id);
+        return User.findByPk(id, {
+            include: [
+                {
+                    model: Employee,
+                    as: "employee",
+                    attributes: ["fullName", "id"],
+                },
+            ],
+        });
     };
 
-    static create = async ({ username, password, role, options = {} }) => {
+    static create = async ({ username, password, role = [], options = {} }) => {
         return User.create({ username, password, role }, options);
     };
 
@@ -27,6 +36,7 @@ class UserRepository {
         return User.update(updateData, {
             where: attributes,
             transaction,
+            returning: true,
         });
     };
 }

@@ -13,11 +13,12 @@ const authentication = async (req, res, next) => {
     if (!userId) {
         throw new UnauthorizedError("Invalid Request");
     }
-    const accessToken = req.headers[HEADER.AUTHORIZATION];
-    if (!accessToken) {
+    const accessTokenBearer = req.headers[HEADER.AUTHORIZATION];
+    if (!accessTokenBearer) {
         throw new UnauthorizedError("Invalid Request");
     }
 
+    const accessToken = accessTokenBearer.split(" ")[1];
     try {
         const decoded = await verifyToken(accessToken);
         if (!decoded) {
@@ -27,6 +28,8 @@ const authentication = async (req, res, next) => {
         req.user = {
             userId: decoded.id,
             username: decoded.username,
+            role: decoded.role,
+            employeeId: decoded.employeeId,
         };
 
         next();

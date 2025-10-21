@@ -21,14 +21,21 @@ class EmployeeController {
     static update = async (req, res, next) => {
         new OK({
             message: "Update Employee successful",
-            metadata: await EmployeeService.update(req.body),
+            metadata: await EmployeeService.update(req.params, req.body),
         }).send(res);
     };
 
     static disable = async (req, res, next) => {
         new OK({
             message: "Disable Employee successful",
-            metadata: await EmployeeService.disableEmployee(req.body),
+            metadata: await EmployeeService.disableEmployee(req.params),
+        }).send(res);
+    };
+
+    static enable = async (req, res, next) => {
+        new OK({
+            message: "Enable Employee successful",
+            metadata: await EmployeeService.enableEmployee(req.params),
         }).send(res);
     };
 }

@@ -10,12 +10,14 @@ User.hasOne(Employee, {
     foreignKey: {
         name: "userId",
     },
+    as: "employee",
 });
 
 Employee.belongsTo(User, {
     foreignKey: {
         name: "userId",
     },
+    as: "user",
 });
 
 Employee.hasMany(Attendance, {

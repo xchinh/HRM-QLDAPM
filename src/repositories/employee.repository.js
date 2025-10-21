@@ -43,10 +43,10 @@ class EmployeeRepository {
         attributes,
         transaction = null,
     }) => {
-        console.log("id: ", attributes);
         return employee.update(update, {
             where: attributes,
             transaction,
+            returning: true,
         });
     };
 

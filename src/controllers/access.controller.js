@@ -4,12 +4,12 @@ const { CREATED, OK } = require("../core/success.response");
 const AccessService = require("../services/access/access.service");
 
 class AccessController {
-    static signup = async (req, res, next) => {
-        new CREATED({
-            message: "Register successful",
-            metadata: await AccessService.signup(req.body),
-        }).send(res);
-    };
+    // static signup = async (req, res, next) => {
+    //     new CREATED({
+    //         message: "Register successful",
+    //         metadata: await AccessService.signup(req.body),
+    //     }).send(res);
+    // };
 
     static login = async (req, res, next) => {
         new OK({

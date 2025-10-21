@@ -26,11 +26,12 @@ const LeaveRequest = sequelize.define(
         status: {
             type: DataTypes.ENUM,
             values: Object.values(STATUS_LEAVE),
-            default: STATUS_LEAVE.PENDING,
+            defaultValue: STATUS_LEAVE.PENDING,
         },
     },
     {
         tableName: TABLE_NAME,
+        timestamps: true,
     }
 );
 

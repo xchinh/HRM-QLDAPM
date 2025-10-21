@@ -13,6 +13,7 @@ const attendance = sequelize.define(
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
+            unique: true,
         },
         date: {
             type: DataTypes.DATE,
@@ -23,6 +24,10 @@ const attendance = sequelize.define(
         status: {
             type: DataTypes.ENUM,
             values: Object.values(STATUS_ATTENDANCE),
+        },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
         },
     },
     {

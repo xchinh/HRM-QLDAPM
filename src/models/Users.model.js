@@ -30,8 +30,7 @@ const User = sequelize.define(
             allowNull: false,
         },
         role: {
-            type: DataTypes.ENUM,
-            values: Object.values(ROLE),
+            type: DataTypes.ARRAY(DataTypes.ENUM(...Object.values(ROLE))),
         },
     },
     {

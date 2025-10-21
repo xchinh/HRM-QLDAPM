@@ -14,35 +14,35 @@ const { ROLE } = require("../../enums");
 const EmployeeRepository = require("../../repositories/employee.repository");
 
 class AccessService {
-    static signup = async ({ username, password, role = ROLE.EMPLOYEE }) => {
-        if (!username) {
-            throw new NotFoundError("Username is required");
-        }
+    // static signup = async ({ username, password, role = ROLE.EMPLOYEE }) => {
+    //     if (!username) {
+    //         throw new NotFoundError("Username is required");
+    //     }
 
-        if (!password) {
-            throw new NotFoundError("Password is required");
-        }
+    //     if (!password) {
+    //         throw new NotFoundError("Password is required");
+    //     }
 
-        const user = await UserRepository.findUser(username);
-        if (user) {
-            throw new ConflictError("User already register");
-        }
+    //     const user = await UserRepository.findUser(username);
+    //     if (user) {
+    //         throw new ConflictError("User already register");
+    //     }
 
-        const passwordHash = await bcrypt.hash(password, 10);
-        const newUser = await UserRepository.create({
-            username,
-            password: passwordHash,
-            role,
-        });
-        if (newUser) {
-            return {
-                data: getDataInfo({
-                    object: newUser,
-                    field: ["id", "username", "role"],
-                }),
-            };
-        }
-    };
+    //     const passwordHash = await bcrypt.hash(password, 10);
+    //     const newUser = await UserRepository.create({
+    //         username,
+    //         password: passwordHash,
+    //         role,
+    //     });
+    //     if (newUser) {
+    //         return {
+    //             data: getDataInfo({
+    //                 object: newUser,
+    //                 field: ["id", "username", "role"],
+    //             }),
+    //         };
+    //     }
+    // };
 
     static login = async ({ username, password }) => {
         if (!username) {
@@ -64,7 +64,6 @@ class AccessService {
             },
         });
 
-        console.log(employee);
         if (employee && !employee.isActive) {
             throw new BadRequestError("Account has been disabled");
         }
@@ -78,6 +77,8 @@ class AccessService {
             payload: {
                 username: foundUser.username,
                 id: foundUser.id,
+                role: foundUser.role,
+                employeeId: employee.id,
             },
         });
 
@@ -104,6 +105,7 @@ class AccessService {
             payload: {
                 username: decoded.username,
                 id: decoded.id,
+                role: decoded.role,
             },
         });
 

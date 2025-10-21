@@ -30,14 +30,15 @@ class EmployeeService {
             throw new BadRequestError("Base salary must be greater than 0");
         }
 
-        const role =
-            position_name.toLowerCase() === "manager" ? "0002" : "0004";
+        const role = position_name.toLowerCase().includes("manager")
+            ? "0002"
+            : "0004";
         const password = await bcrypt.hash("password123", 10);
         const result = await sequelize.transaction(async (t) => {
             const user = await UserRepository.create({
                 username: email,
                 password,
-                role,
+                role: [role],
                 options: {
                     transaction: t,
                 },
@@ -83,14 +84,10 @@ class EmployeeService {
         };
     };
 
-    static update = async ({
+    static update = async (
         id,
-        fullName,
-        email,
-        department_id,
-        position_name,
-        base_salary,
-    }) => {
+        { fullName, email, department_id, position_name, base_salary }
+    ) => {
         if (!id) {
             throw new BadRequestError("Employee Id is required");
         }
@@ -159,6 +156,26 @@ class EmployeeService {
     };
 
     static disableEmployee = async ({ id }) => {
+        if (!id) {
+            throw new BadRequestError("Employee Id is required");
+        }
+
+        const updatedEmployee = await EmployeeRepository.findAndUpdate({
+            update: {
+                isActive: false,
+            },
+            attributes: { id },
+        });
+
+        return {
+            data: getDataInfo({
+                object: updatedEmployee,
+                field: ["id", "fullName", "isActive"],
+            }),
+        };
+    };
+
+    static enableEmployee = async ({ id }) => {
         if (!id) {
             throw new BadRequestError("Employee Id is required");
         }

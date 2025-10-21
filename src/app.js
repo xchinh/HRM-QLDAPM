@@ -6,9 +6,12 @@ const express = require("express");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
-const { asyncHandler } = require("./helpers/asyncHandler");
 const { runSeeders } = require("./seeders");
+const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const swaggerOptions = require("./configs/swagger.config");
 const models = require("./models");
+const { stack } = require("sequelize/lib/utils");
 const app = express();
 
 // Middleware
@@ -19,9 +22,18 @@ app.use(helmet());
 app.use(compression());
 
 // init db
-asyncHandler(require("./db/init.postgres").sync());
-// asyncHandler(runSeeders());
+
+require("./db/init.postgres")
+    .sync({ force: true })
+    .then(() => {
+        runSeeders();
+    });
+
 // init routes
+
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 app.use("/", require("./routes"));
 // handle errors
 
@@ -36,6 +48,7 @@ app.use((error, req, res, next) => {
     return res.status(statusCode).json({
         status: "error",
         code: statusCode,
+        stack: error.stack,
         message: error.message || "Internal Server Error",
     });
 });
