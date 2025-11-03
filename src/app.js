@@ -10,6 +10,8 @@ const { runSeeders } = require("./seeders");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./configs/swagger.config");
 const models = require("./models");
+const corsConfig = require("./configs/cors.config");
+const cors = require('cors');
 const app = express();
 
 // Middleware
@@ -18,6 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
+app.use(cors(corsConfig));
+app.options('*', cors(corsConfig));
 
 // init db
 
