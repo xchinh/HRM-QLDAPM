@@ -1,7 +1,7 @@
 "use strict";
 
-const { BadRequestError, NotFoundError } = require("../../core/error.response");
-const { ROLE, STATUS_LEAVE } = require("../../enums");
+const { BadRequestError, NotFoundError, UnauthorizedError } = require("../../core/error.response");
+const {  STATUS_LEAVE } = require("../../enums");
 const EmployeeRepository = require("../../repositories/employee.repository");
 const LeaveRepository = require("../../repositories/leaveRequest.repository");
 const UserRepository = require("../../repositories/user.repository");
@@ -9,62 +9,60 @@ const { getDataInfo, omitDataInfo } = require("../../utils");
 
 class LeaveService {
     static getAll = async ({ status = null }) => {
-        const data = await LeaveRepository.getAll({
+        const leaves = await LeaveRepository.getAll({
             queries: {
-                ...(status && { status }),
+                where: {
+                    ...(status && {status})
+                },
+                attributes: {
+                    exclude: ["createdAt", "updatedAt"]
+                }
             },
         });
 
         return {
-            data: omitDataInfo({
-                object: data,
-                field: ["createdAt", "updatedAt"],
-            }),
+            data: leaves
         };
     };
 
-    static getAllById = async (id, { status = null }) => {
-        if (!id) {
-            throw new BadRequestError("User Id is required");
-        }
-
-        const user = await UserRepository.findById(id);
-        if (!user) {
-            throw new NotFoundError("User not found");
-        }
-
-        if (!user?.employee) {
-            throw new BadRequestError(
-                "User does not have employee information"
-            );
-        }
-
-        const data = await LeaveRepository.getAll({
-            queries: {
-                ...(status && {
-                    employeeId: user.employee.id,
-                    status,
-                }),
-            },
-        });
-
-        return {
-            data: omitDataInfo({
-                object: data,
-                field: ["createdAt", "updatedAt"],
-            }),
-        };
-    };
-
-    static create = async (
-        employeeId,
-        { reason = null, start_date, end_date }
-    ) => {
+    static getAllByEmployee = async (employeeId, { status = null }) => {
         if (!employeeId) {
             throw new BadRequestError("Employee Id is required");
         }
 
-        const employee = await EmployeeRepository.findById({ id: employeeId });
+        const employee = await EmployeeRepository.findOne({
+            attributes: {
+                id: employeeId
+            }
+        })
+
+        if(!employee) {
+            throw new NotFoundError("Employee not found");
+        }
+
+        const leaves = await LeaveRepository.getAll({
+            queries: {
+                where: {
+                    employeeId: employeeId,
+                    ...(status && {status})
+                },
+                attributes: {
+                    exclude: ["createdAt", "updatedAt"]
+                }
+            },
+        });
+
+        return {
+            data: leaves
+        };
+    };
+
+    static create = async (
+        id,
+        { reason = null, start_date, end_date }
+    ) => {
+
+        const employee = await EmployeeRepository.findById({ id });
         if (!employee) {
             throw new NotFoundError("Employee not found");
         }
@@ -95,7 +93,7 @@ class LeaveService {
         }
 
         const isExistingLeave = await LeaveRepository.isExistingLeave({
-            employeeId,
+            employeeId: employee.id,
             formattedStartDate,
             formattedEndDate,
         });
@@ -107,7 +105,7 @@ class LeaveService {
         }
 
         const newLeave = await LeaveRepository.create({
-            employeeId,
+            employeeId: employee.id,
             start_date: formattedStartDate,
             end_date: formattedEndDate,
             reason,
@@ -145,28 +143,25 @@ class LeaveService {
             throw new NotFoundError("Leave not found");
         }
 
-        const user = await UserRepository.findById(userId);
-        if (!user) {
-            throw new NotFoundError("User not found");
-        }
+        const employee = await EmployeeRepository.findOne({
+            attributes: {
+                userId
+            }
+        })
 
-        if (!user?.employee) {
-            throw new BadRequestError(
-                "User does not have employee information"
-            );
+        if(!employee) {
+            throw new NotFoundError("Employee not found");
         }
 
         const updatedLeave = await LeaveRepository.update({
             updatedData: {
                 status: STATUS_LEAVE.APPROVED,
-                approved_by: user.employee.id,
+                approved_by: employee.id,
             },
             queries: {
                 id,
             },
         });
-
-        console.log(updatedLeave);
 
         return {
             data: {
@@ -193,21 +188,20 @@ class LeaveService {
             throw new NotFoundError("Leave not found");
         }
 
-        const user = await UserRepository.findById(userId);
-        if (!user) {
-            throw new NotFoundError("User not found");
-        }
+        const employee = await EmployeeRepository.findOne({
+            attributes: {
+                userId
+            }
+        })
 
-        if (!user?.employee) {
-            throw new BadRequestError(
-                "User does not have employee information"
-            );
+        if(!employee) {
+            throw new NotFoundError("Employee not found");
         }
 
         const updatedLeave = await LeaveRepository.update({
-            updateData: {
+            updatedData: {
                 status: STATUS_LEAVE.REJECTED,
-                approved_by: user.employee.id,
+                approved_by: employee.id,
             },
             queries: {
                 id,
@@ -223,6 +217,39 @@ class LeaveService {
             },
         };
     };
+
+    static delete = async (id, userId) => {
+        if(!id || !userId) {
+            throw new BadRequestError("Invalid request");
+        }
+
+        const employee = await EmployeeRepository.findOne({
+            attributes: {
+                userId
+            }
+        });
+
+        if(!employee) {
+            throw new NotFoundError("Employee not found");
+        }
+
+        const isPending = await LeaveRepository.isPending({
+            attributes: {
+                id,
+                employeeId: employee.id,
+                status: STATUS_LEAVE.PENDING
+            }
+        })
+        
+        if(!isPending) {
+            throw new BadRequestError("Leave is not pending");
+        }
+
+        await LeaveRepository.delete({
+            id
+        })
+        return true;
+    }
 }
 
 module.exports = LeaveService;

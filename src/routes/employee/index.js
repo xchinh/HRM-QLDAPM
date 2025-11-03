@@ -3,88 +3,28 @@
 const express = require("express");
 const EmployeeController = require("../../controllers/employee.controller");
 const { asyncHandler } = require("../../helpers/asyncHandler");
+const { checkPermission } = require("../../auth/authUtils");
+const { ROLE } = require("../../enums");
 const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Employees
- *   description: Employee management API
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Employee:
- *       type: object
- *       required:
- *         - fullName
- *         - email
- *         - department_id
- *         - position_name
- *         - base_salary
- *       properties:
- *         id:
- *           type: integer
- *           description: Employee ID
- *           example: 1
- *         fullName:
- *           type: string
- *           description: Employee's full name
- *           example: John Doe
- *         email:
- *           type: string
- *           description: Employee's email
- *           example: john.doe@example.com
- *         birthday:
- *           type: string
- *           format: date
- *           description: Employee's date of birth
- *           example: 1990-01-01
- *         hired_at:
- *           type: string
- *           format: date
- *           description: Employee's hire date
- *           example: 2023-01-15
- *         department_id:
- *           type: integer
- *           description: Department ID
- *           example: 1
- *         position_name:
- *           type: string
- *           description: Employee's position
- *           example: Developer
- *         base_salary:
- *           type: number
- *           description: Employee's base salary
- *           example: 5000
- *         isActive:
- *           type: boolean
- *           description: Whether employee is active
- *           example: true
- */
-
-/**
- * @swagger
- * /employee:
+ * /employees:
  *   get:
- *     summary: Get all employees
  *     tags: [Employees]
+ *     summary: Get all employees
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/ClientId'
  *     responses:
  *       200:
- *         description: A list of employees
+ *         description: Successfully retrieved all employees
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 message:
- *                   type: string
- *                   example: Find all employee successful
  *                 metadata:
  *                   type: object
  *                   properties:
@@ -92,94 +32,110 @@ const router = express.Router();
  *                       type: array
  *                       items:
  *                         $ref: '#/components/schemas/Employee'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  *       500:
- *         description: Server error
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
-router.get("/employee", asyncHandler(EmployeeController.getAll));
+router.get("/employees", asyncHandler(EmployeeController.getAll));
+
 /**
  * @swagger
- * /employee/create:
+ * /employee:
  *   post:
- *     summary: Create a new employee
  *     tags: [Employees]
+ *     summary: Create a new employee
+ *     description: Create employee and user account (role inferred from position)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/ClientId'
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - fullName
- *               - email
- *               - department_id
- *               - position_name
- *               - base_salary
- *             properties:
- *               fullName:
- *                 type: string
- *                 example: Jane Smith
- *               email:
- *                 type: string
- *                 example: jane.smith@example.com
- *               birthday:
- *                 type: string
- *                 format: date
- *                 example: 1992-05-15
- *               hired_at:
- *                 type: string
- *                 format: date
- *                 example: 2023-03-01
- *               department_id:
- *                 type: integer
- *                 example: 2
- *               position_name:
- *                 type: string
- *                 example: Senior Developer
- *               base_salary:
- *                 type: number
- *                 example: 6000
+ *             $ref: '#/components/schemas/CreateEmployee'
  *     responses:
  *       201:
  *         description: Employee created successfully
  *         content:
  *           application/json:
  *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.post(
+  "/employee",
+  checkPermission([ROLE.ADMIN, ROLE.MANAGER, ROLE.HR]),
+  asyncHandler(EmployeeController.create)
+);
+
+/**
+ * @swagger
+ * /employee/{id}:
+ *   get:
+ *     tags: [Employees]
+ *     summary: Get employee by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: integer, example: 1 }
+ *       - $ref: '#/components/parameters/ClientId'
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved employee
+ *         content:
+ *           application/json:
+ *             schema:
  *               type: object
  *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 message:
- *                   type: string
- *                   example: Create Employee successful
  *                 metadata:
  *                   type: object
  *                   properties:
  *                     data:
- *                       type: object
- *                       properties:
- *                         employee:
- *                           $ref: '#/components/schemas/Employee'
+ *                       $ref: '#/components/schemas/Employee'
  *       400:
- *         description: Invalid input data
- *       500:
- *         description: Server error
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Employee not found
  */
-router.post("/employee/create", asyncHandler(EmployeeController.create));
+router.get("/employee/:id", asyncHandler(EmployeeController.getEmployee));
+
 /**
  * @swagger
- * /employee/update/{id}:
+ * /employee/{id}:
  *   patch:
- *     summary: Update an employee
  *     tags: [Employees]
+ *     summary: Update an employee
+ *     description: If position changes, related user role may be updated
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
+ *       - name: id
+ *         in: path
  *         required: true
- *         description: Employee ID
- *         example: 1
+ *         schema: { type: integer, example: 1 }
+ *       - $ref: '#/components/parameters/ClientId'
  *     requestBody:
  *       required: true
  *       content:
@@ -187,149 +143,99 @@ router.post("/employee/create", asyncHandler(EmployeeController.create));
  *           schema:
  *             type: object
  *             properties:
- *               fullName:
- *                 type: string
- *                 example: Jane Smith-Johnson
- *               email:
- *                 type: string
- *                 example: jane.johnson@example.com
- *               department_id:
- *                 type: integer
- *                 example: 3
- *               position_name:
- *                 type: string
- *                 example: Manager
- *               base_salary:
- *                 type: number
- *                 example: 8000
+ *               fullName: { type: string }
+ *               email: { type: string, format: email }
+ *               department_id: { type: integer }
+ *               position_name: { type: string }
+ *               base_salary: { type: number, minimum: 1 }
  *     responses:
  *       200:
  *         description: Employee updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 message:
- *                   type: string
- *                   example: Update Employee successful
- *                 metadata:
- *                   type: object
- *                   properties:
- *                     data:
- *                       $ref: '#/components/schemas/Employee'
+ *               $ref: '#/components/schemas/SuccessResponse'
  *       400:
- *         description: Invalid input data
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Employee not found
- *       500:
- *         description: Server error
  */
-router.patch("/employee/update/:id", asyncHandler(EmployeeController.update));
+router.patch("/employee/:id", asyncHandler(EmployeeController.update));
+
 /**
  * @swagger
  * /employee/disable/{id}:
  *   patch:
- *     summary: Disable an employee
  *     tags: [Employees]
+ *     summary: Disable an employee
+ *     description: Set employee status to inactive
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
+ *       - name: id
+ *         in: path
  *         required: true
- *         description: Employee ID
- *         example: 1
+ *         schema: { type: integer, example: 1 }
+ *       - $ref: '#/components/parameters/ClientId'
  *     responses:
  *       200:
  *         description: Employee disabled successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 message:
- *                   type: string
- *                   example: Disable Employee successful
- *                 metadata:
- *                   type: object
- *                   properties:
- *                     data:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                           example: 1
- *                         fullName:
- *                           type: string
- *                           example: Jane Smith
- *                         isActive:
- *                           type: boolean
- *                           example: false
+ *               $ref: '#/components/schemas/SuccessResponse'
  *       400:
- *         description: Invalid input data
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
- *         description: Employee not found
- *       500:
- *         description: Server error
+ *         description: Not found
  */
-router.patch("/employee/disable/:id", asyncHandler(EmployeeController.disable));
+router.patch(
+  "/employee/disable/:id",
+  checkPermission([ROLE.ADMIN, ROLE.MANAGER, ROLE.HR]),
+  asyncHandler(EmployeeController.disable)
+);
 
 /**
  * @swagger
  * /employee/enable/{id}:
  *   patch:
- *     summary: Enable a previously disabled employee
  *     tags: [Employees]
+ *     summary: Enable an employee
+ *     description: Set employee status to active
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
+ *       - name: id
+ *         in: path
  *         required: true
- *         description: Employee ID
- *         example: 1
+ *         schema: { type: integer, example: 1 }
+ *       - $ref: '#/components/parameters/ClientId'
  *     responses:
  *       200:
  *         description: Employee enabled successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 message:
- *                   type: string
- *                   example: Enable Employee successful
- *                 metadata:
- *                   type: object
- *                   properties:
- *                     data:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                           example: 1
- *                         fullName:
- *                           type: string
- *                           example: Jane Smith
- *                         isActive:
- *                           type: boolean
- *                           example: true
+ *               $ref: '#/components/schemas/SuccessResponse'
  *       400:
- *         description: Invalid input data
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *       404:
- *         description: Employee not found
- *       500:
- *         description: Server error
+ *         description: Not found
  */
-router.patch("/employee/enable/:id", asyncHandler(EmployeeController.enable));
+router.patch(
+  "/employee/enable/:id",
+  checkPermission([ROLE.ADMIN, ROLE.MANAGER, ROLE.HR]),
+  asyncHandler(EmployeeController.enable)
+);
+
 module.exports = router;

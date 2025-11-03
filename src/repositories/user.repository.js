@@ -13,15 +13,7 @@ class UserRepository {
     };
 
     static findById = async (id) => {
-        return User.findByPk(id, {
-            include: [
-                {
-                    model: Employee,
-                    as: "employee",
-                    attributes: ["fullName", "id"],
-                },
-            ],
-        });
+        return User.findByPk(id);
     };
 
     static create = async ({ username, password, role = [], options = {} }) => {

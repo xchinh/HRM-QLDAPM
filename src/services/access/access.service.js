@@ -78,7 +78,6 @@ class AccessService {
                 username: foundUser.username,
                 id: foundUser.id,
                 role: foundUser.role,
-                employeeId: employee.id,
             },
         });
 

@@ -7,11 +7,9 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
 const { runSeeders } = require("./seeders");
-const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const swaggerOptions = require("./configs/swagger.config");
+const swaggerSpec = require("./configs/swagger.config");
 const models = require("./models");
-const { stack } = require("sequelize/lib/utils");
 const app = express();
 
 // Middleware
@@ -24,15 +22,17 @@ app.use(compression());
 // init db
 
 require("./db/init.postgres")
-    .sync({ force: true })
-    .then(() => {
-        runSeeders();
-    });
+    .sync()
+    // .then(() => {
+    //     runSeeders();
+    // });
 
 // init routes
 
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  swaggerOptions: { persistAuthorization: true },
+  customSiteTitle: 'HRM API Docs'
+}));
 
 app.use("/", require("./routes"));
 // handle errors

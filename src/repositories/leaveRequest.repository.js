@@ -3,6 +3,7 @@
 const { Op } = require("sequelize");
 const { STATUS_LEAVE } = require("../enums");
 const LeaveRequest = require("../models/LeaveRequest.model");
+const { BadRequestError } = require("../core/error.response");
 
 class LeaveRepository {
     static hasApprovedLeave = async ({ employeeId, date }) => {
@@ -74,9 +75,26 @@ class LeaveRepository {
 
     static getAll = async ({ queries }) => {
         return LeaveRequest.findAll({
-            where: queries,
+            ...queries,
+            raw: true,
         });
     };
+
+    static isPending = async({ attributes = {}}) => {
+        const leave = LeaveRequest.findOne({
+            where: attributes
+        })
+
+        return !!leave;
+    }
+
+    static delete = async (id) => {
+        return LeaveRequest.destroy({
+            where: {
+                id
+            }
+        });;
+    }
 }
 
 module.exports = LeaveRepository;

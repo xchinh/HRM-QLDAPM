@@ -4,7 +4,8 @@ const sequelize = require("../../db/init.postgres");
 const EmployeeRepository = require("../../repositories/employee.repository");
 const UserRepository = require("../../repositories/user.repository");
 const bcrypt = require("bcrypt");
-const { getDataInfo } = require("../../utils");
+const { getDataInfo, omitDataInfo } = require("../../utils");
+const { ROLE } = require("../../enums");
 
 class EmployeeService {
     static create = async ({
@@ -31,8 +32,8 @@ class EmployeeService {
         }
 
         const role = position_name.toLowerCase().includes("manager")
-            ? "0002"
-            : "0004";
+            ? ROLE.MANAGER
+            : ROLE.EMPLOYEE;
         const password = await bcrypt.hash("password123", 10);
         const result = await sequelize.transaction(async (t) => {
             const user = await UserRepository.create({
@@ -83,6 +84,24 @@ class EmployeeService {
             data: employees ? employees : {},
         };
     };
+
+    static getEmployee = async ({id}) => {
+        if(!id) {
+            throw new BadRequestError("Employee Id is required");
+        }
+
+        const employee = await EmployeeRepository.findById({id});
+        if(!employee) {
+            throw new NotFoundError("Employee not found");
+        }
+
+        return {
+            data: omitDataInfo({
+                object: employee,
+                field: ["createdAt", "updatedAt", "userId", "department_id"]
+            }),
+        }
+    }
 
     static update = async (
         id,
@@ -164,7 +183,7 @@ class EmployeeService {
             update: {
                 isActive: false,
             },
-            attributes: { id },
+            attributes: { id , isActive: true},
         });
 
         return {
@@ -182,9 +201,9 @@ class EmployeeService {
 
         const updatedEmployee = await EmployeeRepository.findAndUpdate({
             update: {
-                isActive: false,
+                isActive: true,
             },
-            attributes: { id },
+            attributes: { id, isActive: false},
         });
 
         return {

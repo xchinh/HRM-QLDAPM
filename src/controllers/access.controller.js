@@ -28,7 +28,7 @@ class AccessController {
     static logout = async (req, res, next) => {
         new OK({
             message: "Logout successful",
-            metadata: null,
+            metadata: req.user,
         }).send(res);
     };
 }

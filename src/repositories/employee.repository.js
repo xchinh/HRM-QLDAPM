@@ -1,5 +1,7 @@
 "use strict";
 
+const { NotFoundError } = require("../core/error.response");
+const Department = require("../models/Department.model");
 const employee = require("../models/Employee.model");
 
 class EmployeeRepository {
@@ -31,11 +33,23 @@ class EmployeeRepository {
     };
 
     static findAllEmployee = async () => {
-        return employee.findAll();
+        return employee.findAll({
+            attributes: ['id','fullName', 'email', 'position_name', 'isActive'],
+            include: [{
+                model: Department,
+                attributes: ['name']
+            }]
+        });
     };
 
     static findById = async ({ id }) => {
-        return employee.findByPk(id);
+        return employee.findByPk(id, {
+            include: {
+                model: Department,
+                attributes: ['name']
+            },
+            raw: true,
+        });
     };
 
     static findAndUpdate = async ({
@@ -43,11 +57,20 @@ class EmployeeRepository {
         attributes,
         transaction = null,
     }) => {
-        return employee.update(update, {
+        const existingEmployee = await employee.findOne({
             where: attributes,
             transaction,
-            returning: true,
         });
+
+        if(!existingEmployee) {
+            throw new NotFoundError("Employee not found");
+        }
+
+        const updatedEmployee = await existingEmployee.update(update, {
+            transaction,
+        });
+
+        return updatedEmployee;
     };
 
     static findOne = async ({ attributes }) => {

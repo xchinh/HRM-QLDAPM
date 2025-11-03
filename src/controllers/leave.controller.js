@@ -11,17 +11,17 @@ class LeaveController {
         }).send(res);
     };
 
-    static getAllById = async (req, res, next) => {
+    static getAllByEmployee = async (req, res, next) => {
         new OK({
             message: "Get all Leave of Employee successful",
-            metadata: await LeaveService.getAllById(req.user.userId, req.query),
+            metadata: await LeaveService.getAllByEmployee(req.params.id, req.query),
         }).send(res);
     };
 
     static create = async (req, res, next) => {
         new CREATED({
             message: "Create Leave request successful",
-            metadata: await LeaveService.create(req.user.employeeId, req.body),
+            metadata: await LeaveService.create(req.params.id, req.body),
         }).send(res);
     };
 
@@ -44,6 +44,13 @@ class LeaveController {
             ),
         }).send(res);
     };
+
+    static delete = async (req, res, next) => {
+        new OK({
+            message: "Delete leave successful",
+            metadata: await LeaveService.delete(req.params.id, req.user.userId)
+        }).send(res);
+    }
 }
 
 module.exports = LeaveController;
