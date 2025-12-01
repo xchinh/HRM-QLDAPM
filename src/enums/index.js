@@ -18,4 +18,9 @@ module.exports = {
         HR: "0003",
         EMPLOYEE: "0004",
     },
+    STATUS_PAYROLL: {
+        DRAFT: "0005",
+        CALCULATED: "0006",
+        APPROVED: "0007",
+    },
 };

@@ -16,6 +16,15 @@ class UserRepository {
         return User.findByPk(id);
     };
 
+    static findByIdWithEmployee = async (id) => {
+        return User.findOne({
+            where: {
+                id,
+            },
+            include: [{ model: Employee, as: "employee" }],
+        });
+    };
+
     static create = async ({ username, password, role = [], options = {} }) => {
         return User.create({ username, password, role }, options);
     };

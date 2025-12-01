@@ -6,12 +6,11 @@ const express = require("express");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
-const { runSeeders } = require("./seeders");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./configs/swagger.config");
 const models = require("./models");
 const corsConfig = require("./configs/cors.config");
-const cors = require('cors');
+const cors = require("cors");
 const app = express();
 
 // Middleware
@@ -21,22 +20,25 @@ app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
 app.use(cors(corsConfig));
-app.options('*', cors(corsConfig));
+// app.options('*', cors(corsConfig));
 
 // init db
 
-require("./db/init.postgres")
-    .sync()
-    // .then(() => {
-    //     runSeeders();
-    // });
+require("./db/init.postgres").sync();
+// .then(() => {
+//     runSeeders();
+// });
 
 // init routes
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  swaggerOptions: { persistAuthorization: true },
-  customSiteTitle: 'HRM API Docs'
-}));
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+        swaggerOptions: { persistAuthorization: true },
+        customSiteTitle: "HRM API Docs",
+    })
+);
 
 app.use("/", require("./routes"));
 // handle errors

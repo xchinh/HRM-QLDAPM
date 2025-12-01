@@ -5,7 +5,10 @@ const Attendance = require("./Attendance.model");
 const Department = require("./Department.model");
 const LeaveRequest = require("./LeaveRequest.model");
 const Employee = require("./Employee.model");
+const CompanySetting = require("./CompanySetting.model");
+const Payroll = require("./Payroll.model");
 
+// Existing associations
 User.hasOne(Employee, {
     foreignKey: {
         name: "userId",
@@ -70,10 +73,24 @@ Employee.belongsTo(Department, {
     },
 });
 
+Employee.hasMany(Payroll, {
+    foreignKey: {
+        name: "employeeId",
+    },
+});
+
+Payroll.belongsTo(Employee, {
+    foreignKey: {
+        name: "employeeId",
+    },
+});
+
 module.exports = {
     User,
     Attendance,
     Department,
     LeaveRequest,
     Employee,
+    CompanySetting,
+    Payroll,
 };

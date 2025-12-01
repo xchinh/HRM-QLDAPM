@@ -38,6 +38,22 @@ const employee = sequelize.define(
             allowNull: false,
         },
         isActive: DataTypes.BOOLEAN,
+        allowance: {
+            type: DataTypes.DECIMAL(15, 2),
+            defaultValue: 0,
+        },
+        bonus: {
+            type: DataTypes.DECIMAL(15, 2),
+            defaultValue: 0,
+        },
+        deduction: {
+            type: DataTypes.DECIMAL(15, 2),
+            defaultValue: 0,
+        },
+        dependents: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+        },
     },
     {
         tableName: TABLE_NAME,

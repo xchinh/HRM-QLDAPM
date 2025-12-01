@@ -34,11 +34,12 @@ class EmployeeRepository {
 
     static findAllEmployee = async () => {
         return employee.findAll({
-            attributes: ['id','fullName', 'email', 'position_name', 'isActive'],
-            include: [{
-                model: Department,
-                attributes: ['name']
-            }]
+            include: [
+                {
+                    model: Department,
+                    attributes: ["name"],
+                },
+            ],
         });
     };
 
@@ -46,7 +47,7 @@ class EmployeeRepository {
         return employee.findByPk(id, {
             include: {
                 model: Department,
-                attributes: ['name']
+                attributes: ["name"],
             },
             raw: true,
         });
@@ -62,7 +63,7 @@ class EmployeeRepository {
             transaction,
         });
 
-        if(!existingEmployee) {
+        if (!existingEmployee) {
             throw new NotFoundError("Employee not found");
         }
 

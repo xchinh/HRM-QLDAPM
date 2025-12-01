@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:16
     container_name: postgres_db
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -11,6 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # - ./sample_data.sql:/docker-entrypoint-initdb.d/01-sample-data.sql
     networks:
       - postgres_network
 

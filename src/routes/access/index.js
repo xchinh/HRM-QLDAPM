@@ -20,8 +20,8 @@ const router = express.Router();
  *             type: object
  *             required: [username, password]
  *             properties:
- *               username: { type: string, format: email, example: johndoe@example.com }
- *               password: { type: string, format: password, example: password123 }
+ *               username: { type: string, format: email, example: admin@example.com }
+ *               password: { type: string, format: password, example: password }
  *     responses:
  *       200:
  *         description: Login successful
