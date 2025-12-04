@@ -72,6 +72,7 @@ class EmployeeService {
                         "email",
                         "position_name",
                         "department_id",
+                        "isActive",
                     ],
                 }),
             },
@@ -85,23 +86,23 @@ class EmployeeService {
         };
     };
 
-    static getEmployee = async ({id}) => {
-        if(!id) {
+    static getEmployee = async ({ id }) => {
+        if (!id) {
             throw new BadRequestError("Employee Id is required");
         }
 
-        const employee = await EmployeeRepository.findById({id});
-        if(!employee) {
+        const employee = await EmployeeRepository.findById({ id });
+        if (!employee) {
             throw new NotFoundError("Employee not found");
         }
 
         return {
             data: omitDataInfo({
                 object: employee,
-                field: ["createdAt", "updatedAt", "userId", "department_id"]
+                field: ["createdAt", "updatedAt", "userId", "department_id"],
             }),
-        }
-    }
+        };
+    };
 
     static update = async (
         id,
@@ -158,7 +159,12 @@ class EmployeeService {
             });
         }
 
-        const updatedEmployee = await employee.update(updateData);
+        const updatedEmployee = await EmployeeRepository.findAndUpdate({
+            update: updateData,
+            attributes: {
+                id,
+            },
+        });
         return {
             data: getDataInfo({
                 object: updatedEmployee,
@@ -183,7 +189,7 @@ class EmployeeService {
             update: {
                 isActive: false,
             },
-            attributes: { id , isActive: true},
+            attributes: { id, isActive: true },
         });
 
         return {
@@ -203,7 +209,7 @@ class EmployeeService {
             update: {
                 isActive: true,
             },
-            attributes: { id, isActive: false},
+            attributes: { id, isActive: false },
         });
 
         return {

@@ -21,14 +21,14 @@ class EmployeeController {
     static getEmployee = async (req, res, next) => {
         new OK({
             message: "Get Employee successful",
-            metadata: await EmployeeService.getEmployee(req.params)
+            metadata: await EmployeeService.getEmployee(req.params),
         }).send(res);
-    }
+    };
 
     static update = async (req, res, next) => {
         new OK({
             message: "Update Employee successful",
-            metadata: await EmployeeService.update(req.params, req.body),
+            metadata: await EmployeeService.update(req.params.id, req.body),
         }).send(res);
     };
 

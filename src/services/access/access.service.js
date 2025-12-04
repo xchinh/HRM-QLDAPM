@@ -84,7 +84,7 @@ class AccessService {
         return {
             data: getDataInfo({
                 object: foundUser,
-                field: ["id", "username"],
+                field: ["id", "username", "role"],
             }),
             tokens,
         };
