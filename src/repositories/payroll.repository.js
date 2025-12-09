@@ -20,10 +20,10 @@ class PayrollRepository {
             include: [
                 {
                     model: Employee,
-                    attributes: ["id", "fullName", "email", "position_name"],
+                    attributes: ["fullName", "email", "position_name"],
                 },
             ],
-            order: order || [["employeeId", "ASC"]],
+            order: order ?? [["employee_id", "ASC"]],
         });
     };
 

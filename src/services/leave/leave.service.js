@@ -1,27 +1,28 @@
 "use strict";
 
-const { BadRequestError, NotFoundError, UnauthorizedError } = require("../../core/error.response");
-const {  STATUS_LEAVE } = require("../../enums");
+const { BadRequestError, NotFoundError } = require("../../core/error.response");
+const { STATUS_LEAVE } = require("../../enums");
 const EmployeeRepository = require("../../repositories/employee.repository");
 const LeaveRepository = require("../../repositories/leaveRequest.repository");
-const UserRepository = require("../../repositories/user.repository");
 const { getDataInfo, omitDataInfo } = require("../../utils");
+const employee = require("../../models/Employee.model");
 
 class LeaveService {
     static getAll = async ({ status = null }) => {
         const leaves = await LeaveRepository.getAll({
             queries: {
                 where: {
-                    ...(status && {status})
+                    ...(status && { status }),
                 },
                 attributes: {
-                    exclude: ["createdAt", "updatedAt"]
-                }
+                    exclude: ["createdAt", "updatedAt"],
+                },
+                include: [{ model: employee, attributes: ["fullName", "id"] }],
             },
         });
 
         return {
-            data: leaves
+            data: leaves,
         };
     };
 
@@ -32,11 +33,11 @@ class LeaveService {
 
         const employee = await EmployeeRepository.findOne({
             attributes: {
-                id: employeeId
-            }
-        })
+                id: employeeId,
+            },
+        });
 
-        if(!employee) {
+        if (!employee) {
             throw new NotFoundError("Employee not found");
         }
 
@@ -44,24 +45,20 @@ class LeaveService {
             queries: {
                 where: {
                     employeeId: employeeId,
-                    ...(status && {status})
+                    ...(status && { status }),
                 },
                 attributes: {
-                    exclude: ["createdAt", "updatedAt"]
-                }
+                    exclude: ["createdAt", "updatedAt"],
+                },
             },
         });
 
         return {
-            data: leaves
+            data: leaves,
         };
     };
 
-    static create = async (
-        id,
-        { reason = null, start_date, end_date }
-    ) => {
-
+    static create = async (id, { reason = null, start_date, end_date }) => {
         const employee = await EmployeeRepository.findById({ id });
         if (!employee) {
             throw new NotFoundError("Employee not found");
@@ -145,11 +142,11 @@ class LeaveService {
 
         const employee = await EmployeeRepository.findOne({
             attributes: {
-                userId
-            }
-        })
+                userId,
+            },
+        });
 
-        if(!employee) {
+        if (!employee) {
             throw new NotFoundError("Employee not found");
         }
 
@@ -190,11 +187,11 @@ class LeaveService {
 
         const employee = await EmployeeRepository.findOne({
             attributes: {
-                userId
-            }
-        })
+                userId,
+            },
+        });
 
-        if(!employee) {
+        if (!employee) {
             throw new NotFoundError("Employee not found");
         }
 
@@ -219,17 +216,17 @@ class LeaveService {
     };
 
     static delete = async (id, userId) => {
-        if(!id || !userId) {
+        if (!id || !userId) {
             throw new BadRequestError("Invalid request");
         }
 
         const employee = await EmployeeRepository.findOne({
             attributes: {
-                userId
-            }
+                userId,
+            },
         });
 
-        if(!employee) {
+        if (!employee) {
             throw new NotFoundError("Employee not found");
         }
 
@@ -237,19 +234,19 @@ class LeaveService {
             attributes: {
                 id,
                 employeeId: employee.id,
-                status: STATUS_LEAVE.PENDING
-            }
-        })
-        
-        if(!isPending) {
+                status: STATUS_LEAVE.PENDING,
+            },
+        });
+
+        if (!isPending) {
             throw new BadRequestError("Leave is not pending");
         }
 
         await LeaveRepository.delete({
-            id
-        })
+            id,
+        });
         return true;
-    }
+    };
 }
 
 module.exports = LeaveService;

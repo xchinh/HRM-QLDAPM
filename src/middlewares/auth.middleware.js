@@ -1,7 +1,11 @@
 "use strict";
 
 const { verifyToken } = require("../auth/authUtils");
-const { UnauthorizedError, BadRequestError } = require("../core/error.response");
+const {
+    UnauthorizedError,
+    BadRequestError,
+} = require("../core/error.response");
+const department = require("../models/Department.model");
 
 const HEADER = {
     CLIENT_ID: "x-client-id",
@@ -25,7 +29,7 @@ const authentication = async (req, res, next) => {
             throw new UnauthorizedError("AccessToken invalid");
         }
 
-        if(parseInt(userId) !== decoded.id) {
+        if (parseInt(userId) !== decoded.id) {
             throw new BadRequestError("User Id not match");
         }
 
@@ -33,6 +37,7 @@ const authentication = async (req, res, next) => {
             userId: decoded.id,
             username: decoded.username,
             role: decoded.role,
+            department_id: decoded.department_id,
         };
 
         next();

@@ -6,7 +6,7 @@ const { UnauthorizedError } = require("../core/error.response");
 
 const createPairToken = async ({ payload }) => {
     const accessToken = await JWT.sign(payload, jwtConfig.accessSecret, {
-        expiresIn: 60 * 5,
+        expiresIn: 60 * 60 * 24,
     });
 
     const refreshToken = await JWT.sign(payload, jwtConfig.refreshSecret, {

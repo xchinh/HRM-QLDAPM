@@ -6,12 +6,12 @@ const { getDataInfo } = require("../../utils");
 const { createPairToken, verifyToken } = require("../../auth/authUtils");
 const {
     NotFoundError,
-    ConflictError,
     UnauthorizedError,
     BadRequestError,
 } = require("../../core/error.response");
 const { ROLE } = require("../../enums");
 const EmployeeRepository = require("../../repositories/employee.repository");
+const department = require("../../models/Department.model");
 
 class AccessService {
     // static signup = async ({ username, password, role = ROLE.EMPLOYEE }) => {
@@ -78,14 +78,18 @@ class AccessService {
                 username: foundUser.username,
                 id: foundUser.id,
                 role: foundUser.role,
+                department_id: employee.department_id,
             },
         });
 
         return {
-            data: getDataInfo({
-                object: foundUser,
-                field: ["id", "username", "role"],
-            }),
+            data: {
+                ...getDataInfo({
+                    object: foundUser,
+                    field: ["id", "username", "role"],
+                }),
+                department_id: employee.department_id,
+            },
             tokens,
         };
     };
@@ -105,6 +109,7 @@ class AccessService {
                 username: decoded.username,
                 id: decoded.id,
                 role: decoded.role,
+                department_id: decoded.department_id,
             },
         });
 

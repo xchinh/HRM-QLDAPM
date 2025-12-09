@@ -76,12 +76,14 @@ Employee.belongsTo(Department, {
 Employee.hasMany(Payroll, {
     foreignKey: {
         name: "employeeId",
+        field: "employee_id",
     },
 });
 
 Payroll.belongsTo(Employee, {
     foreignKey: {
         name: "employeeId",
+        field: "employee_id",
     },
 });
 

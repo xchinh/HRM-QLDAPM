@@ -76,25 +76,24 @@ class LeaveRepository {
     static getAll = async ({ queries }) => {
         return LeaveRequest.findAll({
             ...queries,
-            raw: true,
         });
     };
 
-    static isPending = async({ attributes = {}}) => {
+    static isPending = async ({ attributes = {} }) => {
         const leave = LeaveRequest.findOne({
-            where: attributes
-        })
+            where: attributes,
+        });
 
         return !!leave;
-    }
+    };
 
     static delete = async (id) => {
         return LeaveRequest.destroy({
             where: {
-                id
-            }
-        });;
-    }
+                id,
+            },
+        });
+    };
 }
 
 module.exports = LeaveRepository;
